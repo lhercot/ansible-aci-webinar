@@ -1,8 +1,11 @@
 ---
 - hosts: mso
   gather_facts: False
+<<<<<<< HEAD
   collections:
   - cisco.mso
+=======
+>>>>>>> Adding a new Tenant to MSO
   tasks:
   - name: Add TenantA to MSO
     mso_tenant: &tenant_present
@@ -11,4 +14,8 @@
       password: '{{ mso_password }}'
       validate_certs: no
       tenant: TenantA
+<<<<<<< HEAD
+=======
+      description: Our super new Tenant
+>>>>>>> Adding a new Tenant to MSO
       state: present

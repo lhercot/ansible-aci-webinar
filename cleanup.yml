@@ -95,8 +95,11 @@
 
 - hosts: mso
   gather_facts: False
+<<<<<<< HEAD
   collections:
     - cisco.mso
+=======
+>>>>>>> Adding a new Tenant to MSO
   tasks:
   - name: Remove TenantA to MSO
     mso_tenant:
