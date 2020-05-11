@@ -1,0 +1,18 @@
+---
+- hosts: aci
+  gather_facts: False
+  tasks:
+  - name: Create Policy Group for VPCs
+    cisco.aci.aci_interface_policy_leaf_policy_group:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      password: '{{ apic_password }}'
+      validate_certs: no
+      lag_type: node
+      policy_group: 'Server1'
+      link_level_policy: 10G_Auto
+      cdp_policy: CDP_Enabled
+      lldp_policy: LLDP_Enabled
+      port_channel_policy: LACP_Enabled
+      aep: Servers_AAEP
+      state: present

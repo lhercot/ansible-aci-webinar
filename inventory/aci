@@ -1,0 +1,4 @@
+apic ansible_connection=local
+
+[aci]
+apic
