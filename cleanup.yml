@@ -2,6 +2,60 @@
 - hosts: aci
   gather_facts: False
   tasks:
+  - name: Create LLDP Policies
+    cisco.aci.aci_interface_policy_lldp:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      lldp_policy: '{{ item.name }}'
+      receive_state: '{{ item.state }}'
+      transmit_state: '{{ item.state  }}'
+      state: absent
+    delegate_to: localhost
+    loop:
+        - { name: LLDP_Enabled, state: yes }
+        - { name: LLDP_Disabled, state: no }
+
+  - name: Create CDP Policies
+    cisco.aci.aci_interface_policy_cdp:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      cdp_policy: '{{ item.name }}'
+      admin_state: '{{ item.state }}'
+      state: absent
+    delegate_to: localhost
+    loop:
+      - { name: CDP_Enabled, state: yes }
+      - { name: CDP_Disabled, state: no }
+
+  - name: Create a Port-Channel Policy
+    cisco.aci.aci_interface_policy_port_channel:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      mode: active
+      port_channel: LACP_Enabled
+      state: absent
+    delegate_to: localhost
+
+  - name: Add the Server AEP
+    cisco.aci.aci_aep:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      aep: Servers_AAEP
+      state: absent
+    delegate_to: localhost
+
   - name: Delete Policy Group for VPC List
     cisco.aci.aci_interface_policy_leaf_policy_group:
       host: '{{ apic }}'
@@ -19,6 +73,9 @@
       state: absent
     with_sequence: start=1 end=10 format=Server%02d
 
+- hosts: servers
+  gather_facts: False
+  tasks:
   - name: Delete Policy Group for Single VPC
     cisco.aci.aci_interface_policy_leaf_policy_group:
       host: '{{ apic }}'
@@ -28,10 +85,10 @@
       private_key: "{{ lookup('file', 'certs/admin.key') }}"
       validate_certs: no
       lag_type: node
-      policy_group: 'ServerA'
+      policy_group: '{{ inventory_hostname }}'
       link_level_policy: 10G_Auto
       cdp_policy: CDP_Enabled
       lldp_policy: LLDP_Enabled
       port_channel_policy: LACP_Enabled
       state: absent
-#   delegate_to: localhost
+    delegate_to: localhost
