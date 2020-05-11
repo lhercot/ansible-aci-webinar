@@ -1,5 +1,5 @@
 ---
-- hosts: aci
+- hosts: servers
   gather_facts: False
   tasks:
   - name: Create Policy Group for VPCs
@@ -9,11 +9,11 @@
       password: '{{ apic_password }}'
       validate_certs: no
       lag_type: node
-      policy_group: '{{ item }}'
+      policy_group: '{{ ansible_host }}'
       link_level_policy: 10G_Auto
       cdp_policy: CDP_Enabled
       lldp_policy: LLDP_Enabled
       port_channel_policy: LACP_Enabled
       aep: Servers_AAEP
       state: present
-    with_sequence: start=1 end=10 format=Server%02d
+    delegate_to: localhost
