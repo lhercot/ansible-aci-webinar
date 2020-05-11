@@ -7,7 +7,8 @@
     cisco.aci.aci_interface_policy_leaf_policy_group:
       host: '{{ apic }}'
       username: '{{ apic_user }}'
-      password: '{{ apic_password }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
       validate_certs: no
       lag_type: node
       policy_group: '{{ ansible_host }}'
@@ -17,7 +18,3 @@
       port_channel_policy: LACP_Enabled
       aep: Servers_AAEP
       state: present
-<<<<<<< HEAD
-=======
-    delegate_to: localhost
->>>>>>> User a list of servers in inventory to make the creation parallel.
