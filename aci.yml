@@ -9,10 +9,11 @@
       password: '{{ apic_password }}'
       validate_certs: no
       lag_type: node
-      policy_group: 'Server1'
+      policy_group: '{{ item }}'
       link_level_policy: 10G_Auto
       cdp_policy: CDP_Enabled
       lldp_policy: LLDP_Enabled
       port_channel_policy: LACP_Enabled
       aep: Servers_AAEP
       state: present
+    with_sequence: start=1 end=10 format=Server%02d
