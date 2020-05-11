@@ -20,3 +20,61 @@
       schema: Hybrid-Cloud
       template: Template 1
       state: present
+
+  - name: Create VRF
+    mso_schema_template_vrf:
+      host: '{{ mso }}'
+      username: '{{ mso_user }}'
+      password: '{{ mso_password }}'
+      validate_certs: no
+      schema: Hybrid-Cloud
+      template: Template 1
+      vrf: VRF
+      state: present
+    
+  - name: Create BD
+    mso_schema_template_bd:
+      host: '{{ mso }}'
+      username: '{{ mso_user }}'
+      password: '{{ mso_password }}'
+      validate_certs: no
+      schema: Hybrid-Cloud
+      template: Template 1
+      bd: BD
+      vrf:
+        name: VRF
+      subnets:
+      - ip: 10.0.0.254/24
+      layer2_stretch: yes
+      state: present
+
+  - name: Create ANP
+    mso_schema_template_anp:
+      host: '{{ mso }}'
+      username: '{{ mso_user }}'
+      password: '{{ mso_password }}'
+      validate_certs: no
+      schema: Hybrid-Cloud
+      template: Template 1
+      anp: ANP
+      state: present
+
+  - name: Create EPGs
+    mso_schema_template_anp_epg:
+      host: '{{ mso }}'
+      username: '{{ mso_user }}'
+      password: '{{ mso_password }}'
+      validate_certs: no
+      schema: Hybrid-Cloud
+      template: Template 1
+      anp: ANP
+      epg: '{{ item }}'
+      bd:
+        name: BD
+      vrf:
+        name: VRF
+      state: present
+    loop:
+    - Web
+    - App
+    - DB
