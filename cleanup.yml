@@ -95,14 +95,22 @@
 
 - hosts: mso
   gather_facts: False
-<<<<<<< HEAD
   collections:
     - cisco.mso
-=======
->>>>>>> Adding a new Tenant to MSO
   tasks:
+  - name: Remove Hybrid-Cloud schema
+    mso_schema_template: 
+      host: '{{ mso }}'
+      username: '{{ mso_user }}'
+      password: '{{ mso_password }}'
+      validate_certs: no
+      tenant: TenantA
+      schema: Hybrid-Cloud
+      template: Template 1
+      state: absent
+
   - name: Remove TenantA to MSO
-    mso_tenant:
+    mso_tenant: &tenant_present
       host: '{{ mso }}'
       username: '{{ mso_user }}'
       password: '{{ mso_password }}'
