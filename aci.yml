@@ -1,6 +1,7 @@
 ---
-- hosts: aci
+- hosts: servers
   gather_facts: False
+  connection: local
   tasks:
   - name: Create Policy Group for VPCs
     cisco.aci.aci_interface_policy_leaf_policy_group:
@@ -9,11 +10,10 @@
       password: '{{ apic_password }}'
       validate_certs: no
       lag_type: node
-      policy_group: '{{ item }}'
+      policy_group: '{{ ansible_host }}'
       link_level_policy: 10G_Auto
       cdp_policy: CDP_Enabled
       lldp_policy: LLDP_Enabled
       port_channel_policy: LACP_Enabled
       aep: Servers_AAEP
       state: present
-    with_sequence: start=1 end=10 format=Server%02d

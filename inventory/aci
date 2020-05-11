@@ -1,4 +1,8 @@
 apic ansible_connection=local
+Server[A:J]
 
 [aci]
 apic
+
+[servers]
+Server[A:J]
