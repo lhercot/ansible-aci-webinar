@@ -1,6 +1,61 @@
 ---
+- hosts: aci
+  gather_facts: False
+  connection: local
+  tasks:
+  - name: Create LLDP Policies
+    cisco.aci.aci_interface_policy_lldp:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      lldp_policy: '{{ item.name }}'
+      receive_state: '{{ item.state }}'
+      transmit_state: '{{ item.state  }}'
+      state: present
+    loop:
+        - { name: LLDP_Enabled, state: yes }
+        - { name: LLDP_Disabled, state: no }
+
+  - name: Create CDP Policies
+    cisco.aci.aci_interface_policy_cdp:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      cdp_policy: '{{ item.name }}'
+      admin_state: '{{ item.state }}'
+      state: present
+    loop:
+      - { name: CDP_Enabled, state: yes }
+      - { name: CDP_Disabled, state: no }
+
+  - name: Create a Port-Channel Policy
+    cisco.aci.aci_interface_policy_port_channel:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      mode: active
+      port_channel: LACP_Enabled
+      state: present
+
+  - name: Add the Server AEP
+    cisco.aci.aci_aep:
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      validate_certs: no
+      aep: Servers_AAEP
+      state: present
+
 - hosts: servers
   gather_facts: False
+  connection: local
   tasks:
   - name: Create Policy Group for VPCs
     cisco.aci.aci_interface_policy_leaf_policy_group:
@@ -10,11 +65,10 @@
       private_key: "{{ lookup('file', 'certs/admin.key') }}"
       validate_certs: no
       lag_type: node
-      policy_group: '{{ ansible_host }}'
+      policy_group: '{{ inventory_hostname }}'
       link_level_policy: 10G_Auto
       cdp_policy: CDP_Enabled
       lldp_policy: LLDP_Enabled
       port_channel_policy: LACP_Enabled
       aep: Servers_AAEP
       state: present
-    delegate_to: localhost
