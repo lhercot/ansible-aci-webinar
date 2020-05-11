@@ -1,0 +1,14 @@
+---
+- hosts: mso
+  gather_facts: False
+  collections:
+  - cisco.mso
+  tasks:
+  - name: Add TenantA to MSO
+    mso_tenant: &tenant_present
+      host: '{{ mso }}'
+      username: '{{ mso_user }}'
+      password: '{{ mso_password }}'
+      validate_certs: no
+      tenant: TenantA
+      state: present

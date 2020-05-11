@@ -1,8 +1,12 @@
 apic ansible_connection=local
+mso ansible_connection=local
 Server[A:J]
 
 [aci]
 apic
+
+[mso]
+mso
 
 [servers]
 Server[A:J]
