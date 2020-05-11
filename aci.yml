@@ -17,3 +17,7 @@
       port_channel_policy: LACP_Enabled
       aep: Servers_AAEP
       state: present
+<<<<<<< HEAD
+=======
+    delegate_to: localhost
+>>>>>>> User a list of servers in inventory to make the creation parallel.
