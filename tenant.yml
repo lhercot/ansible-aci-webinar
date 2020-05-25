@@ -1,0 +1,182 @@
+---
+- hosts: aci
+  gather_facts: False
+  connection: local
+  vars:
+    aci_login: &aci_login
+      host: '{{ apic }}'
+      username: '{{ apic_user }}'
+      certificate_name: admin
+      private_key: "{{ lookup('file', 'certs/admin.key') }}"
+      use_proxy: 'no'
+      validate_certs: 'no'
+
+  tasks:
+    - name: Remove dump file
+      file:
+        path: 'dump.json'
+        state: absent
+
+    - name: Ensure tenant exists
+      cisco.aci.aci_tenant:
+          <<: *aci_login
+          name: TenantA 
+          descr: 'tenant by Ansible'
+          output_path: 'dump.json'
+
+    - name: Ensure VRF exists
+      cisco.aci.aci_vrf:
+          <<: *aci_login
+          tenant: TenantA
+          name: VRF1
+          state: present
+          output_path: 'dump.json'
+
+    - name: Ensure BD's exist
+      cisco.aci.aci_bd:
+        <<: *aci_login
+        name: '{{ item }}'
+        vrf: VRF1 
+        tenant: TenantA 
+        state: present 
+        output_path: 'dump.json'
+      loop:
+      - BD1
+      - BD2
+
+    - name: Add subnet to BD
+      cisco.aci.aci_bd_subnet: 
+        <<: *aci_login
+        tenant: TenantA 
+        bd: '{{ item.name }}'
+        subnet_name: '{{ item.name }}'
+        gateway: '{{ item.gw }}'
+        mask: 24
+        state: present 
+        output_path: 'dump.json'
+      loop:
+      - { name: BD1, gw: 10.10.10.1 }
+      - { name: BD2, gw: 20.20.20.1 }
+
+    - name: Ensure filters exist
+      cisco.aci.aci_filter: 
+        <<: *aci_login
+        name: '{{ item }}'
+        tenant: TenantA 
+        state: present
+        output_path: 'dump.json'
+      loop:
+      - Web_Filter
+      - App_Filter
+      - DB_Filter
+
+    - name: Ensure entries for filters exist
+      cisco.aci.aci_filter_entry: 
+        <<: *aci_login
+        name: '{{ item.name }}' 
+        ether_type: ip
+        ip_protocol: tcp
+        tenant: TenantA
+        filter: '{{ item.name }}'
+        dst_port: '{{ item.dst_port }}'
+        state: present
+        output_path: 'dump.json'
+      loop:
+      - { name: Web_Filter, dst_port: 80 }
+      - { name: App_Filter, dst_port: 1433 }
+      - { name: DB_Filter, dst_port: 1521 }
+
+    - name: Ensure contracts exist
+      cisco.aci.aci_contract:       
+        <<: *aci_login
+        name: '{{ item }}'
+        tenant: TenantA 
+        output_path: 'dump.json'
+      with_items:
+      - Web_Con
+      - App_Con
+      - DB_Con
+
+    - name: Ensure subject exists for contracts
+      cisco.aci.aci_contract_subject: 
+        <<: *aci_login
+        subject: '{{ item.name }}'
+        contract: '{{ item.contract }}' 
+        tenant: TenantA
+        output_path: 'dump.json'
+      loop:
+      - { name: web_subject, contract: Web_Con }
+      - { name: app_subject, contract: App_Con }
+      - { name: db_subject, contract: DB_Con }
+    
+    - name: Ensure filter exists in contract subjects
+      cisco.aci.aci_contract_subject_to_filter: 
+        <<: *aci_login
+        subject: '{{ item.subject }}'
+        contract: '{{ item.contract }}'
+        filter: '{{ item.filter }}' 
+        tenant: TenantA 
+        output_path: 'dump.json'
+      loop:
+      - { subject: web_subject, contract: Web_Con, filter: Web_Filter }
+      - { subject: app_subject, contract: App_Con, filter: App_Filter }
+      - { subject: db_subject, contract: DB_Con, filter: DB_Filter }
+
+    # TESTING APP NET PROFILES AND EPGS
+
+    - name: Create App Profile
+      cisco.aci.aci_ap: 
+        <<: *aci_login
+        name: 3Tier_App
+        tenant: TenantA 
+        state: present 
+        output_path: 'dump.json'
+
+    - name: Ensure EPGs exist
+      cisco.aci.aci_epg:
+        <<: *aci_login
+        name: '{{ item.name }}'
+        bd: '{{ item.bd }}'
+        ap: 3Tier_App
+        tenant: TenantA
+        state: present
+        output_path: 'dump.json'
+      loop:
+      - { name: Web_EPG, bd: BD1 }
+      - { name: App_EPG, bd: BD1 }
+      - { name: DB_EPG, bd: BD1 }
+    
+    - name: Map web epg to VMM Domain
+      cisco.aci.aci_epg_to_domain:
+        <<: *aci_login
+        tenant: TenantA
+        ap: 3Tier_App
+        epg: '{{ item.epg }}'
+        domain_type: vmm
+        vm_provider: vmware
+        domain: '{{ item.domain }}'
+        state: present
+        output_path: 'dump.json'
+      loop:
+      - { epg: Web_EPG, domain: ACI-VDS }
+      - { epg: App_EPG, domain: ACI-VDS }
+      - { epg: DB_EPG, domain: ACI-VDS }
+
+
+    - name: Add contracts to  web epg
+      cisco.aci.aci_epg_to_contract:
+        <<: *aci_login
+        tenant: TenantA
+        ap: 3Tier_App
+        epg: '{{ item.epg }}'
+        contract: '{{ item.contract }}'
+        contract_type: '{{ item.contract_type }}'
+        state: present
+        output_path: 'dump.json'
+      loop:
+      - { epg: Web_EPG, contract: Web_Con, contract_type: consumer}
+      - { epg: Web_EPG, contract: Web_Con, contract_type: provider}
+      - { epg: Web_EPG, contract: App_Con, contract_type: provider}
+      - { epg: App_EPG, contract: App_Con, contract_type: consumer }
+      - { epg: App_EPG, contract: DB_Con, contract_type: provider }
+      - { epg: DB_EPG, contract: DB_Con, contract_type: consumer }

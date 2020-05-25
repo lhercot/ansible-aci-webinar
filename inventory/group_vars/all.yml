@@ -5,3 +5,8 @@ apic_password: Sup3rS3cr3tPassword!
 mso: 10.23.248.72
 mso_user: admin
 mso_password: Sup3rS3cr3tPassword!
+
+nae: 173.36.219.125
+nae_user: admin
+nae_password: Sup3rS3cr3tPassword!
+nae_assurance_group: new_assurance_group1

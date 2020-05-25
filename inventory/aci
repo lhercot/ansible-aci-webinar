@@ -1,8 +1,5 @@
-apic ansible_connection=local
-Server[A:J]
-
 [aci]
-apic
+apic ansible_connection=local
 
-[servers]
-Server[A:J]
+[nae]
+nae ansible_connection=local ansible_python_interpreter=venv/bin/python

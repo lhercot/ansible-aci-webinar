@@ -1,0 +1,30 @@
+---
+- hosts: nae
+  gather_facts: False
+  connection: local
+  vars:
+    nae_login: &nae_login
+      host: '{{ nae }}'
+      port: 443
+      username: '{{ nae_user }}'
+      password: '{{ nae_password }}'
+      validate_certs: no
+
+  tasks:
+  - name: Create a Pre-Change Verification Analysis from file
+    cisco.nae.nae_prechange:
+      <<: *nae_login
+      ag_name: '{{ nae_assurance_group }}'
+      file: dump.json
+      name: ACI_Ansible1
+      verify: True
+      stop: True
+      state: present
+
+  - name: Query a pre-change analysis
+    cisco.nae.nae_prechange:
+      <<: *nae_login
+      ag_name: '{{ nae_assurance_group }}'
+      name: ACI_Ansible1
+      verify: True
+      state: query
