@@ -18,7 +18,7 @@
       file: dump.json
       name: ACI_Ansible1
       verify: True
-      stop: True
+      # stop: True
       state: present
 
   - name: Query a pre-change analysis
