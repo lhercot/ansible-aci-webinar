@@ -4,19 +4,27 @@
   collections:
   - cisco.mso
   tasks:
+  - name: Set vars
+    set_fact: 
+      mso_info: &mso_info
+        host: '{{ mso }}'
+        username: '{{ mso_user }}'
+        password: '{{ mso_password }}'
+        validate_certs: no
+
   - name: Add TenantA to MSO
-    mso_tenant: &tenant_present
-      host: '{{ mso }}'
-      username: '{{ mso_user }}'
-      password: '{{ mso_password }}'
-      validate_certs: no
+    mso_tenant:
+      <<: *mso_info
       tenant: TenantA
+      users:
+      - automation
       state: present
 
 
   - name: Create Hybrid-Cloud schema
     mso_schema_template: 
-      <<: *tenant_present
+      <<: *mso_info
       schema: Hybrid-Cloud
+      tenant: TenantA
       template: Template 1
       state: present
