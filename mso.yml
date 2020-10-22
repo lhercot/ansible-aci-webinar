@@ -4,29 +4,32 @@
   collections:
   - cisco.mso
   tasks:
+  - name: Set vars
+    set_fact: 
+      mso_info: &mso_info
+        host: '{{ mso }}'
+        username: '{{ mso_user }}'
+        password: '{{ mso_password }}'
+        validate_certs: no
+
   - name: Add TenantA to MSO
-    mso_tenant: &tenant_present
-      host: '{{ mso }}'
-      username: '{{ mso_user }}'
-      password: '{{ mso_password }}'
-      validate_certs: no
+    mso_tenant:
+      <<: *mso_info
       tenant: TenantA
       state: present
 
 
   - name: Create Hybrid-Cloud schema
     mso_schema_template: 
-      <<: *tenant_present
+      <<: *mso_info
       schema: Hybrid-Cloud
+      tenant: TenantA
       template: Template 1
       state: present
 
   - name: Create VRF
     mso_schema_template_vrf:
-      host: '{{ mso }}'
-      username: '{{ mso_user }}'
-      password: '{{ mso_password }}'
-      validate_certs: no
+      <<: *mso_info
       schema: Hybrid-Cloud
       template: Template 1
       vrf: VRF
@@ -34,10 +37,7 @@
     
   - name: Create BD
     mso_schema_template_bd:
-      host: '{{ mso }}'
-      username: '{{ mso_user }}'
-      password: '{{ mso_password }}'
-      validate_certs: no
+      <<: *mso_info
       schema: Hybrid-Cloud
       template: Template 1
       bd: BD
@@ -50,10 +50,7 @@
 
   - name: Create ANP
     mso_schema_template_anp:
-      host: '{{ mso }}'
-      username: '{{ mso_user }}'
-      password: '{{ mso_password }}'
-      validate_certs: no
+      <<: *mso_info
       schema: Hybrid-Cloud
       template: Template 1
       anp: ANP
@@ -61,10 +58,7 @@
 
   - name: Create EPGs
     mso_schema_template_anp_epg:
-      host: '{{ mso }}'
-      username: '{{ mso_user }}'
-      password: '{{ mso_password }}'
-      validate_certs: no
+      <<: *mso_info
       schema: Hybrid-Cloud
       template: Template 1
       anp: ANP
