@@ -1,9 +1,9 @@
-apic: 10.23.248.91
-apic_user: admin
+apic: 10.23.248.116
+apic_user: automation
 apic_password: Sup3rS3cr3tPassword!
 
-mso: 10.23.248.72
-mso_user: admin
+mso: 10.23.248.73
+mso_user: automation
 mso_password: Sup3rS3cr3tPassword!
 
 nae: 10.23.248.125
