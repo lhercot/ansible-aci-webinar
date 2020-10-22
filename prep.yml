@@ -8,6 +8,6 @@
       host: '{{ apic }}'
       username: '{{ apic_user }}'
       password: '{{ apic_password }}'
-      aaa_user: admin
+      aaa_user: '{{ apic_user }}'
       certificate_name: admin
       certificate: "{{ lookup('file', 'certs/admin.crt') }}"
