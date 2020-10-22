@@ -1,6 +1,7 @@
 ---
 - hosts: aci
   gather_facts: False
+  connection: local
   tasks:
   - name: Create Policy Group for VPCs
     cisco.aci.aci_interface_policy_leaf_policy_group:
@@ -9,7 +10,7 @@
       password: '{{ apic_password }}'
       validate_certs: no
       lag_type: node
-      policy_group: 'Server01'
+      policy_group: Server01
       link_level_policy: 10G_Auto
       cdp_policy: CDP_Enabled
       lldp_policy: LLDP_Enabled
